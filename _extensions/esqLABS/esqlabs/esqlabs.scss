@@ -12,6 +12,7 @@ $black: rgb(44, 50, 63);
 $white: white;
 $body-color: $black !default;
 $body-bg: $white !default;
+$code-block-bg: #f1f3f4 !default;
 $blue: #26B042 !default;
 $green: #0C87D1 !default;
 $red: #EB1733 !default;
@@ -62,6 +63,10 @@ $font-family-monospace: 'Fira Code', monospace !default;
 
 #title-slide .date {
   font-size: 0.7em;
+}
+
+.kable-table {
+  font-size: 0.9rem;
 }
 
 

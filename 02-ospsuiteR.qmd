@@ -1,0 +1,550 @@
+---
+title: "OSPSuite R"
+subtitle: "How to use it"
+date: 2023-01-01
+author: Felix MIL
+institute: |
+  ![](esqlabs.svg){height=100}
+format: 
+  esqlabs-revealjs:
+    df-print: kable
+---
+
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      fig.showtext = TRUE)
+```
+
+```{r, echo = FALSE}
+library(ospsuite)
+```
+
+## OSPSuite
+
+Simulations from PK-Sim and MoBi
+
+-   Load
+-   Manipulate
+-   Run
+-   Visualize
+
+## Overview
+
+::: panel-tabset
+### Load
+
+```{r}
+simFilePath <- system.file("extdata", "Aciclovir.pkml", package = "ospsuite")
+
+sim <- loadSimulation(simFilePath)
+```
+
+```{r, echo = FALSE}
+sim
+```
+
+### Manipulate
+
+```{r}
+
+parameter_path <- "Organism|Liver|Interstitial|Volume"
+param <- getParameter(parameter_path, sim)
+```
+
+```{r, echo = FALSE}
+param
+```
+
+```{r}
+setParameterValues(param, 0.5)
+```
+
+```{r, echo = FALSE}
+getParameter("Organism|Liver|Interstitial|Volume", sim)
+```
+
+### Run
+
+```{r}
+simulationResults <- runSimulations(simulations = sim)
+```
+
+```{r, echo = FALSE}
+simulationResults <- simulationResults[[1]]
+
+head(simulationResultsToDataFrame(simulationResults))
+```
+
+### Visualize
+
+```{r, echo = FALSE}
+outputPath <- "Organism|PeripheralVenousBlood|Aciclovir|Plasma (Peripheral Venous Blood)"
+obsData <- lapply(
+  c("ObsDataAciclovir_1.pkml", "ObsDataAciclovir_2.pkml", "ObsDataAciclovir_3.pkml"),
+  function(x) loadDataSetFromPKML(system.file("extdata", x, package = "ospsuite"))
+)
+# Name the elements of the list according to the names of the loaded `DataSet`.
+names(obsData) <- lapply(obsData, function(x) x$name)
+
+myDataCombined <- DataCombined$new()
+
+myDataCombined$addSimulationResults(
+  simulationResults = simulationResults,
+  quantitiesOrPaths = outputPath,
+  names = "Aciclovir Plasma"
+)
+
+myDataCombined$addDataSets(
+  obsData$`Vergin 1995.Iv`
+)
+```
+
+```{r}
+plotIndividualTimeProfile(dataCombined = myDataCombined)
+```
+:::
+
+## Included Example
+
+`{ospsuiteR}` comes with an example simulation of Aciclovir in a `.pkml` file. It can be accessed with:
+
+```{r, eval = FALSE}
+system.file("extdata", "Aciclovir.pkml", package = "ospsuite")
+```
+
+# Load
+
+## Load a Simulation
+
+use the `loadSimulations()` function to load a `.pkml` file.
+
+```{r}
+simFilePath <- system.file("extdata", "Aciclovir.pkml", package = "ospsuite")
+
+sim <- loadSimulation(simFilePath)
+```
+
+# Manipulate
+
+## Paths
+
+Paths are character strings that represent the hierarchical structure of the simulation.
+
+The **elements** of a path are separated by `|`.
+
+```{r}
+# molecule
+molecule_path <- "Organism|VenousBlood|Plasma|Aciclovir"
+
+# parameter
+liver_interstitial_space <- "Organism|Liver|Interstitial|Volume"
+
+```
+
+## Containers
+
+### Create a container
+
+A `Simulation` object is a container for all the elements of a simulation.
+
+However, sub-containers can be created as shortcut to more specific compartments with `getContainer()`
+
+```{r}
+liver <- getContainer("Organism|Liver", sim)
+
+liver
+```
+
+```{r}
+liver_interstitial <- getContainer("Interstitial", liver)
+
+liver_interstitial
+```
+
+## Containers
+
+### Search for Containers
+
+`{ospsuite}` has special functions to explore the paths of a simulation. It works in tandem with a special path syntax including *wildcards* (`*`).
+
+```{r}
+# get all the containers available in "Liver"
+head(getAllContainersMatching("Organism|Liver|*", sim), 4)
+```
+
+::: callout-tip
+Identical results with sub-containers:
+
+``` r
+getAllContainersMatching("*", liver)
+```
+:::
+
+## Wildcards
+
+`**` is a wildcard that matches any number of path elements.
+
+```{r}
+# get all the containers that have an Interstitial space
+interstitial_containers <- getAllContainersMatching("Organism|**|Interstitial", sim)
+length(interstitial_containers)
+head(interstitial_containers, 4)
+```
+
+## Wildcards
+
+`*` is a wildcard that matches exactly one path element.
+
+```{r}
+# get all the containers that have an Interstitial with exactly one path element before "Interstitial"
+interstitial_containers_1 <- getAllContainersMatching("Organism|*|Interstitial", sim)
+interstitial_containers_1[1]
+
+# get all the containers that have an Interstitial with exactly two path element before "Interstitial"
+interstitial_containers_2 <- getAllContainersMatching("Organism|*|*|Interstitial", sim)
+interstitial_containers_2[1]
+
+# get all the containers that have an Interstitial with exactly three path element before "Interstitial"
+interstitial_containers_3 <- getAllContainersMatching("Organism|*|*|*|Interstitial", sim)
+interstitial_containers_3[1]
+```
+
+```{r}
+length(interstitial_containers_1) + length(interstitial_containers_2) + length(interstitial_containers_3)
+```
+
+## Parameters & Molecules
+
+### Get them
+
+Parameter and Molecules values can be read from the simulation with `getParameter()` and `getMolecule()`.
+
+```{r}
+getParameter("Organism|Liver|Interstitial|Volume", sim)
+```
+
+```{r}
+getMolecule("Organism|VenousBlood|Plasma|Aciclovir", sim)
+```
+
+::: callout-tip
+Identical results with sub-containers:
+
+``` r
+getParameter("Interstitial|Volume", liver)
+getParameter("Volume", liver_interstitial)
+```
+:::
+
+------------------------------------------------------------------------
+
+## Parameters & Molecules
+
+### Search for them
+
+Like containers, parameters and molecules can be searched with `getAllParametersMatching()` and `getAllMoleculesMatching()` and wildcards syntax.
+
+```{r}
+# Search all Molecules path including Aciclovir in the liver
+head(getAllMoleculesMatching("**|Aciclovir", liver), 4)
+```
+
+------------------------------------------------------------------------
+
+```{r}
+# Search all "Volume" parameters in the liver container
+head(getAllParametersMatching("**|Volume", liver), 4)
+```
+
+## Parameters & Molecules
+
+### Set Them
+
+Once a `get...()` function is used, the resulting object can be used to **change** the value of the parameter or molecule initial values.
+
+```{r}
+ageParam <- getParameter("Organism|Age", sim)
+
+ageParam
+```
+
+```{r}
+setParameterValues(ageParam, 55, units = "year(s)")
+
+ageParam
+```
+
+------------------------------------------------------------------------
+
+```{r}
+plasma_aciclovir <- getMolecule("Organism|VenousBlood|Plasma|Aciclovir", sim)
+
+plasma_aciclovir
+
+```
+
+```{r}
+setMoleculeInitialValues(plasma_aciclovir, 0.5)
+
+plasma_aciclovir
+```
+
+```{r}
+plasma_aciclovir$reset()
+
+plasma_aciclovir
+```
+
+# Run
+
+## Get Simulation results
+
+Each simulation get a unique identifier.
+
+```{r}
+sim_res <- runSimulations(simulations = sim)
+
+sim_res
+```
+
+```{r, echo = FALSE}
+sim_res <- sim_res[[1]]
+```
+
+
+```{r}
+getOutputValues(sim_res)
+```
+
+# Vizualize
+
+## Simulated and Observed Data
+
+Comparing simulated and observed data is crucial in modeling and simulation workflow.
+
+`{ospsuite}` provides a set of features to handle these data before visualizing them.
+
+-   `DataSet` to import and store observed data,
+-   `DataCombined` to link observed and simulated data
+
+## DataSet
+
+in `{ospsuite}` observed data are stored in `DataSet` objects.
+
+Standard format for data coming from:
+
+  - Manual entry,
+  - `.pkml` files,
+  - Excel files
+
+## DataSet from R
+
+Each `DataSet` must be **named** when the object is created.
+
+```{r}
+dataSet <- DataSet$new("Aciclovir")
+
+dataSet
+```
+
+--- 
+
+
+```{r}
+dataSet$setValues(
+  xValues = c(1, 2, 3, 4),
+  yValues = c(0, 0.1, 0.6, 10),
+  yErrorValues = c(0.001, 0.001, 0.1, 1)
+)
+dataSetToTibble(dataSet)
+```
+
+
+## DataSet from PKML
+
+```{r}
+filePath <- system.file("extdata", "ObsDataAciclovir_1.pkml", package = "ospsuite")
+
+dataSet <- loadDataSetFromPKML(filePath = filePath)
+
+dataSet
+```
+
+
+## DataSet from Excel File
+
+Loading observed data from an Excel sheet requires an `ImporterConfiguration` object.
+
+`ImporterConfiguration` describes the mapping of the columns and metadata of the Excel sheet.
+
+Can be created in PK-SIM or MoBi (`.xml` file) and loaded in R using the `loadDataImporterConfiguration()`
+
+------------------------------------------------------------------------
+
+```{r}
+
+configurationFilePath <- system.file("extdata", "dataImporterConfiguration.xml", package = "ospsuite")
+excelFilePath <- system.file("extdata", "CompiledDataSet.xlsx", package = "ospsuite")
+
+dataImporterConfiguration  <- loadDataImporterConfiguration(configurationFilePath = configurationFilePath) 
+
+
+dataImporterConfiguration
+```
+
+------------------------------------------------------------------------
+
+```{r}
+dataImporterConfiguration$sheets <- "TestSheet_1"
+
+dataSets <- loadDataSetsFromExcel(
+  xlsFilePath = excelFilePath,
+  importerConfigurationOrPath = dataImporterConfiguration
+)
+
+names(dataSets)
+```
+
+## DataCombined
+
+
+:::{.center-xy}
+✅ Simulated Data + ✅ Observed Data = `DataCombined`
+:::
+
+## Create a DataCombined Object
+
+```{r}
+myDataCombined <- DataCombined$new()
+
+myDataCombined
+```
+
+## Add simulation results
+
+use the `addSimulationResults()` method
+
+```{r}
+myDataCombined$addSimulationResults(
+  simulationResults = sim_res
+)
+```
+
+
+```{r}
+myDataCombined
+```
+
+
+## Add Observed Data
+
+use the `addDataSet()` method
+
+```{r}
+myDataCombined$addDataSets(
+  obsData$`Vergin 1995.Iv`
+)
+```
+
+
+```{r}
+myDataCombined
+```
+
+---
+
+
+```{r}
+head(myDataCombined$toDataFrame())
+```
+
+```{r, echo = FALSE}
+myDC_df <- myDataCombined$toDataFrame()
+```
+
+
+```{r}
+unique(myDC_df$name)
+```
+
+---
+
+```{r}
+plotIndividualTimeProfile(dataCombined = myDataCombined)
+```
+
+## Rename and Group Simulated and Observed Data
+
+
+```{r}
+myDataCombined <- DataCombined$new()
+
+
+myDataCombined$addSimulationResults(
+  simulationResults = sim_res,
+  names = "Simulated",
+  groups = "Aciclovir"
+)
+
+myDataCombined$addDataSets(
+  obsData$`Vergin 1995.Iv`,
+  names = "Observed (Vergin 1995.Iv)",
+  groups = "Aciclovir"
+)
+```
+
+
+```{r, echo = FALSE}
+myDC_df <- myDataCombined$toDataFrame()
+unique(myDC_df$name)
+unique(myDC_df$group)
+```
+
+---
+
+```{r, echo = FALSE}
+plotIndividualTimeProfile(dataCombined = myDataCombined)
+```
+
+
+## Add several Observed Data
+
+- Only one Simulated Data,
+- Several Observed Data sets
+
+```{r, warning= FALSE}
+myDataCombined <- DataCombined$new()
+
+
+myDataCombined$addSimulationResults(
+  simulationResults = sim_res,
+  names = "Simulated",
+)
+
+myDataCombined$addDataSets(
+  dataSets = c(obsData$`Vergin 1995.Iv`, obsData$`Laskin 1982.Group C`),
+  names = c("Observed (Vergin 1995.Iv)", "Observed (Laskin 1982.Group C)"),
+  # groups = "Aciclovir"
+)
+```
+
+```{r}
+myDC_df <- myDataCombined$toDataFrame()
+unique(myDC_df$name)
+unique(myDC_df$group)
+```
+
+
+---
+
+
+```{r}
+plotIndividualTimeProfile(dataCombined = myDataCombined)
+```
+
+
+
+## Visualize
+
+
+
