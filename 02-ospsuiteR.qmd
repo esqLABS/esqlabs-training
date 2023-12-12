@@ -5,14 +5,12 @@ date: 2023-01-01
 author: Felix MIL
 institute: |
   ![](esqlabs.svg){height=100}
-format: 
-  esqlabs-revealjs:
-    df-print: kable
+format: esqlabs-revealjs
 ---
 
 ```{r setup, echo = FALSE}
-knitr::opts_chunk$set(echo = TRUE,
-                      fig.showtext = TRUE)
+knitr::opts_chunk$set(fig.showtext = TRUE,
+                      fig.align = "center")
 ```
 
 ```{r, echo = FALSE}
@@ -407,10 +405,7 @@ names(dataSets)
 
 ## DataCombined
 
-
-:::{.center-xy}
 ✅ Simulated Data + ✅ Observed Data = `DataCombined`
-:::
 
 ## Create a DataCombined Object
 
@@ -428,12 +423,9 @@ use the `addSimulationResults()` method
 myDataCombined$addSimulationResults(
   simulationResults = sim_res
 )
-```
-
-
-```{r}
 myDataCombined
 ```
+
 
 
 ## Add Observed Data
@@ -444,26 +436,16 @@ use the `addDataSet()` method
 myDataCombined$addDataSets(
   obsData$`Vergin 1995.Iv`
 )
-```
-
-
-```{r}
 myDataCombined
 ```
+
 
 ---
 
 
 ```{r}
-head(myDataCombined$toDataFrame())
-```
-
-```{r, echo = FALSE}
 myDC_df <- myDataCombined$toDataFrame()
-```
-
-
-```{r}
+head(myDC_df)
 unique(myDC_df$name)
 ```
 
@@ -491,19 +473,17 @@ myDataCombined$addDataSets(
   names = "Observed (Vergin 1995.Iv)",
   groups = "Aciclovir"
 )
-```
 
-
-```{r, echo = FALSE}
 myDC_df <- myDataCombined$toDataFrame()
 unique(myDC_df$name)
 unique(myDC_df$group)
 ```
 
+
 ---
 
 ```{r, echo = FALSE}
-plotIndividualTimeProfile(dataCombined = myDataCombined)
+plotIndividualTimeProfile(myDataCombined)
 ```
 
 
@@ -513,23 +493,21 @@ plotIndividualTimeProfile(dataCombined = myDataCombined)
 - Several Observed Data sets
 
 ```{r, warning= FALSE}
-myDataCombined <- DataCombined$new()
+myDataCombined2 <- DataCombined$new()
 
 
-myDataCombined$addSimulationResults(
+myDataCombined2$addSimulationResults(
   simulationResults = sim_res,
   names = "Simulated",
 )
 
-myDataCombined$addDataSets(
+myDataCombined2$addDataSets(
   dataSets = c(obsData$`Vergin 1995.Iv`, obsData$`Laskin 1982.Group C`),
   names = c("Observed (Vergin 1995.Iv)", "Observed (Laskin 1982.Group C)"),
   # groups = "Aciclovir"
 )
-```
 
-```{r}
-myDC_df <- myDataCombined$toDataFrame()
+myDC_df <- myDataCombined2$toDataFrame()
 unique(myDC_df$name)
 unique(myDC_df$group)
 ```
@@ -539,12 +517,135 @@ unique(myDC_df$group)
 
 
 ```{r}
-plotIndividualTimeProfile(dataCombined = myDataCombined)
+plotIndividualTimeProfile(myDataCombined2)
 ```
 
 
 
 ## Visualize
+
+Now that our `DataCombined` object is ready, we can visualize the data in many ways:
+
+- Time Profile,
+- Observed vs Simulated,
+- Residuals,
+- Multi-Panel
+
+
+
+## Time Profile
+
+```{r}
+plotIndividualTimeProfile(myDataCombined)
+```
+
+
+## Observed vs Simulated
+
+```{r}
+plotObservedVsSimulated(myDataCombined)
+```
+
+## Residuals vs Simulated
+
+```{r}
+plotResidualsVsSimulated(myDataCombined)
+```
+
+## Residuals vs Time
+
+```{r}
+plotResidualsVsTime(myDataCombined)
+```
+
+
+## Customize Plots
+
+Customization of plots is done using a `DefaultPlotConfiguration` object.
+
+```{r}
+myPlotConfiguration <-  DefaultPlotConfiguration$new()
+
+myPlotConfiguration
+```
+
+---
+
+```{r}
+myPlotConfiguration$title <- "Example: Customize a Plot"
+myPlotConfiguration$subtitle <- "Using `DefaultPlotConfiguration` class"
+myPlotConfiguration$caption <- "Source: `Aciclovir` data"
+
+plotIndividualTimeProfile(myDataCombined, defaultPlotConfiguration =  myPlotConfiguration)
+
+```
+
+## Multi-Panel
+
+```{r}
+
+noLegendPlotConfiguration <-  DefaultPlotConfiguration$new()
+noLegendPlotConfiguration$legendPosition <- "none"
+
+legendPlotConfiguration <- DefaultPlotConfiguration$new()
+legendPlotConfiguration$legendPosition <- "outsideTop"
+
+indivProfile <- plotIndividualTimeProfile(myDataCombined, noLegendPlotConfiguration)
+resVsSim <- plotResidualsVsSimulated(myDataCombined, noLegendPlotConfiguration)
+resVsTime <- plotResidualsVsTime(myDataCombined, legendPlotConfiguration)
+
+plotGridConfiguration <- PlotGridConfiguration$new()
+
+plotGridConfiguration$title <- "Multiple plots in one figure"
+
+plotGridConfiguration$addPlots(plots = list(indivProfile, resVsSim, resVsTime))
+```
+
+
+---
+
+Use the `PlotGridConfiguration` class to customize the multi-panel plot.
+
+```{r}
+plotGrid(plotGridConfiguration)
+```
+
+---
+
+```{r, fig.asp = 0.8}
+plotGridConfiguration$nColumns <- 1
+plotGridConfiguration$tagLevels <- "i"
+plotGrid(plotGridConfiguration)
+```
+
+
+## Save Plots
+
+Export settings can be managed in `ExportConfiguration` objects.
+
+```{r}
+
+myExportConfiguration <- tlf::ExportConfiguration$new(
+  path = "resources/02",
+  name =  "exportedPlot",
+  width = 20,
+  height = 20,
+  dpi = 300,
+  unit = "cm",
+  format = "svg"
+)
+  
+
+myExportConfiguration$savePlot(plotGrid(plotGridConfiguration))
+```
+
+---
+
+
+![](resources/02/exportedPlot.svg){fig-align="center"}
+
+
+
 
 
 
