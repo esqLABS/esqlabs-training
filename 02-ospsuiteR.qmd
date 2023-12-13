@@ -97,7 +97,7 @@ myDataCombined$addDataSets(
 )
 ```
 
-```{r}
+```{r, out.height="30%"}
 plotIndividualTimeProfile(dataCombined = myDataCombined)
 ```
 :::
@@ -120,6 +120,8 @@ use the `loadSimulations()` function to load a `.pkml` file.
 simFilePath <- system.file("extdata", "Aciclovir.pkml", package = "ospsuite")
 
 sim <- loadSimulation(simFilePath)
+
+sim
 ```
 
 # Manipulate
@@ -141,8 +143,6 @@ liver_interstitial_space <- "Organism|Liver|Interstitial|Volume"
 
 ## Containers
 
-### Create a container
-
 A `Simulation` object is a container for all the elements of a simulation.
 
 However, sub-containers can be created as shortcut to more specific compartments with `getContainer()`
@@ -159,15 +159,13 @@ liver_interstitial <- getContainer("Interstitial", liver)
 liver_interstitial
 ```
 
-## Containers
-
-### Search for Containers
+## Search for Containers
 
 `{ospsuite}` has special functions to explore the paths of a simulation. It works in tandem with a special path syntax including *wildcards* (`*`).
 
 ```{r}
 # get all the containers available in "Liver"
-head(getAllContainersMatching("Organism|Liver|*", sim), 4)
+head(getAllContainersMatching("Organism|Liver|*", sim), 3)
 ```
 
 ::: callout-tip
@@ -189,7 +187,7 @@ length(interstitial_containers)
 head(interstitial_containers, 4)
 ```
 
-## Wildcards
+------------------------------------------------------------------------
 
 `*` is a wildcard that matches exactly one path element.
 
@@ -213,8 +211,6 @@ length(interstitial_containers_1) + length(interstitial_containers_2) + length(i
 
 ## Parameters & Molecules
 
-### Get them
-
 Parameter and Molecules values can be read from the simulation with `getParameter()` and `getMolecule()`.
 
 ```{r}
@@ -236,9 +232,7 @@ getParameter("Volume", liver_interstitial)
 
 ------------------------------------------------------------------------
 
-## Parameters & Molecules
-
-### Search for them
+## Explore Parameters & Molecules
 
 Like containers, parameters and molecules can be searched with `getAllParametersMatching()` and `getAllMoleculesMatching()` and wildcards syntax.
 
@@ -254,9 +248,7 @@ head(getAllMoleculesMatching("**|Aciclovir", liver), 4)
 head(getAllParametersMatching("**|Volume", liver), 4)
 ```
 
-## Parameters & Molecules
-
-### Set Them
+## Set Parameters & Molecules Values
 
 Once a `get...()` function is used, the resulting object can be used to **change** the value of the parameter or molecule initial values.
 
@@ -287,6 +279,8 @@ setMoleculeInitialValues(plasma_aciclovir, 0.5)
 plasma_aciclovir
 ```
 
+Original values can be restored with `reset()`.
+
 ```{r}
 plasma_aciclovir$reset()
 
@@ -305,14 +299,28 @@ sim_res <- runSimulations(simulations = sim)
 sim_res
 ```
 
+
+```{r}
+outputValues <- getOutputValues(sim_res[[1]])
+
+names(outputValues)
+
+outputValues$metaData
+```
+
+
 ```{r, echo = FALSE}
 sim_res <- sim_res[[1]]
 ```
 
+---
 
 ```{r}
-getOutputValues(sim_res)
+outputValues$data
 ```
+
+
+
 
 # Vizualize
 
@@ -331,9 +339,9 @@ in `{ospsuite}` observed data are stored in `DataSet` objects.
 
 Standard format for data coming from:
 
-  - Manual entry,
-  - `.pkml` files,
-  - Excel files
+-   Manual entry,
+-   `.pkml` files,
+-   Excel files
 
 ## DataSet from R
 
@@ -345,8 +353,7 @@ dataSet <- DataSet$new("Aciclovir")
 dataSet
 ```
 
---- 
-
+------------------------------------------------------------------------
 
 ```{r}
 dataSet$setValues(
@@ -354,9 +361,9 @@ dataSet$setValues(
   yValues = c(0, 0.1, 0.6, 10),
   yErrorValues = c(0.001, 0.001, 0.1, 1)
 )
+
 dataSetToTibble(dataSet)
 ```
-
 
 ## DataSet from PKML
 
@@ -365,9 +372,8 @@ filePath <- system.file("extdata", "ObsDataAciclovir_1.pkml", package = "ospsuit
 
 dataSet <- loadDataSetFromPKML(filePath = filePath)
 
-dataSet
+dataSetToTibble(dataSet)
 ```
-
 
 ## DataSet from Excel File
 
@@ -426,8 +432,6 @@ myDataCombined$addSimulationResults(
 myDataCombined
 ```
 
-
-
 ## Add Observed Data
 
 use the `addDataSet()` method
@@ -439,9 +443,7 @@ myDataCombined$addDataSets(
 myDataCombined
 ```
 
-
----
-
+------------------------------------------------------------------------
 
 ```{r}
 myDC_df <- myDataCombined$toDataFrame()
@@ -449,14 +451,13 @@ head(myDC_df)
 unique(myDC_df$name)
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r}
 plotIndividualTimeProfile(dataCombined = myDataCombined)
 ```
 
 ## Rename and Group Simulated and Observed Data
-
 
 ```{r}
 myDataCombined <- DataCombined$new()
@@ -479,18 +480,16 @@ unique(myDC_df$name)
 unique(myDC_df$group)
 ```
 
-
----
+------------------------------------------------------------------------
 
 ```{r, echo = FALSE}
 plotIndividualTimeProfile(myDataCombined)
 ```
 
-
 ## Add several Observed Data
 
-- Only one Simulated Data,
-- Several Observed Data sets
+-   Only one Simulated Data,
+-   Several Observed Data sets
 
 ```{r, warning= FALSE}
 myDataCombined2 <- DataCombined$new()
@@ -512,33 +511,26 @@ unique(myDC_df$name)
 unique(myDC_df$group)
 ```
 
-
----
-
+------------------------------------------------------------------------
 
 ```{r}
 plotIndividualTimeProfile(myDataCombined2)
 ```
 
-
-
 ## Visualize
 
 Now that our `DataCombined` object is ready, we can visualize the data in many ways:
 
-- Time Profile,
-- Observed vs Simulated,
-- Residuals,
-- Multi-Panel
-
-
+-   Time Profile,
+-   Observed vs Simulated,
+-   Residuals,
+-   Multi-Panel
 
 ## Time Profile
 
 ```{r}
 plotIndividualTimeProfile(myDataCombined)
 ```
-
 
 ## Observed vs Simulated
 
@@ -558,7 +550,6 @@ plotResidualsVsSimulated(myDataCombined)
 plotResidualsVsTime(myDataCombined)
 ```
 
-
 ## Customize Plots
 
 Customization of plots is done using a `DefaultPlotConfiguration` object.
@@ -569,7 +560,7 @@ myPlotConfiguration <-  DefaultPlotConfiguration$new()
 myPlotConfiguration
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r}
 myPlotConfiguration$title <- "Example: Customize a Plot"
@@ -601,8 +592,7 @@ plotGridConfiguration$title <- "Multiple plots in one figure"
 plotGridConfiguration$addPlots(plots = list(indivProfile, resVsSim, resVsTime))
 ```
 
-
----
+------------------------------------------------------------------------
 
 Use the `PlotGridConfiguration` class to customize the multi-panel plot.
 
@@ -610,14 +600,13 @@ Use the `PlotGridConfiguration` class to customize the multi-panel plot.
 plotGrid(plotGridConfiguration)
 ```
 
----
+------------------------------------------------------------------------
 
 ```{r, fig.asp = 0.8}
 plotGridConfiguration$nColumns <- 1
 plotGridConfiguration$tagLevels <- "i"
 plotGrid(plotGridConfiguration)
 ```
-
 
 ## Save Plots
 
@@ -639,13 +628,6 @@ myExportConfiguration <- tlf::ExportConfiguration$new(
 myExportConfiguration$savePlot(plotGrid(plotGridConfiguration))
 ```
 
----
-
+------------------------------------------------------------------------
 
 ![](resources/02/exportedPlot.svg){fig-align="center"}
-
-
-
-
-
-
