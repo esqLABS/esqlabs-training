@@ -1,0 +1,15 @@
+---
+title: "Calculate PK Parameters"
+subtitle: "How to use it"
+date: 2023-01-01
+author: Felix MIL
+institute: |
+  ![](esqlabs.svg){height=100}
+format: esqlabs-revealjs
+---
+
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(fig.showtext = TRUE,
+                      fig.align = "center")
+```
+
