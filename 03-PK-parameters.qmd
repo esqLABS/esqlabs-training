@@ -1,7 +1,7 @@
 ---
 title: "Calculate PK Parameters"
-subtitle: "How to use it"
-date: 2023-01-01
+subtitle: "Introduction to `{OSPSuiteR}`"
+date: 2024-01-01
 author: Felix MIL
 institute: |
   ![](esqlabs.svg){height=100}
@@ -13,3 +13,52 @@ knitr::opts_chunk$set(fig.showtext = TRUE,
                       fig.align = "center")
 ```
 
+
+# PK Parameters
+
+## What are PK Parameters?
+
+PK
+
+## Available PK parameters depends on the simulation type
+
+  
+| Simulation Type | PK Parameters                              |
+|-----------------|--------------------------------------------|
+| All             | AUC, Cmax, Cend, tmax, Half-Life, MRT, ... |
+| IV              | Vss, Vd, CL, Body clearance, ...           |
+| Oral            | Vss/F, Vd/F, CL/F, Fraction absorbed, ...  |
+| Multiple adm.   | AUC, Cthrough_dDi, ...                     |
+
+  
+:::center-x
+Full list: [docs.open-systems-pharmacology.org](https://docs.open-systems-pharmacology.org/working-with-pk-sim/pk-sim-documentation/pk-sim-simulations#pk-parameters)
+:::
+
+:::notes
+- MRT: Mean residence time
+- Vss: Volume of distribution at steady state
+- Vd: Volume of distribution
+- CL: Clearance
+- F: Bioavailability
+- Cthrough: Trough concentration just before the i-th dose is administered
+:::
+
+
+
+# Compute PK Parameters
+
+## Calculated from Simulation Results
+
+- PK parameters can be calculated for all outputs of a simulation.
+- Pass a `SimulationResults` object to `calculatePKAnalyses()`.
+
+
+```r
+pkAnalysis <- calculatePKAnalyses(results = simulationResults)
+```
+
+
+# Import and Export
+
+# Custom PK Parameters
