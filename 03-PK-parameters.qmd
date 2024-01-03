@@ -16,9 +16,13 @@ knitr::opts_chunk$set(fig.showtext = TRUE,
 
 # PK Parameters
 
-## What are PK Parameters?
+## PK-Analysis View in PK-Sim®
 
-PK
+
+![PK-Analysis view of the Results window.](https://881660647-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-LNl6UIiFP7k0sNQthlR%2F-LQJPSoNjgtDlxBl9HHq%2F-LOWQ5AI-r7-sKUIoPqE%2Fpk-analysis-20-17.jpg?generation=1541162017853367&alt=media)
+
+Also available through `{ospsuiteR}`
+
 
 ## Available PK parameters depends on the simulation type
 
@@ -45,6 +49,12 @@ Full list: [docs.open-systems-pharmacology.org](https://docs.open-systems-pharma
 :::
 
 
+## Overview
+
+1. Compute PK parameters
+2. Access PK parameters
+3. Import and export
+4. Customize PK parameters
 
 # Compute PK Parameters
 
@@ -58,7 +68,133 @@ Full list: [docs.open-systems-pharmacology.org](https://docs.open-systems-pharma
 pkAnalysis <- calculatePKAnalyses(results = simulationResults)
 ```
 
+## Get simulation results
+
+```{r}
+# Load the package
+library(ospsuite)
+
+# Load the simulation
+sim <- loadSimulation(system.file("extdata", "Aciclovir.pkml", package = "ospsuite"))
+
+# Run the simulation
+simulationResults <- runSimulation(simulation = sim)
+```
+
+## Calculate PK paremeters
+
+```{r}
+pkAnalysis <- calculatePKAnalyses(results = simulationResults)
+pkAnalysis
+```
+
+# Explore PK Parameters
+
+
+## Available Output Paths & Parameters
+
+```{r}
+pkAnalysis$allQuantityPaths
+pkAnalysis$allPKParameterNames
+```
+
+
+## All parameters for one output path
+
+`allPKParametersFor()` allows to access all PK parameters for a given output path.
+
+```{r}
+pkAnalysis$allPKParametersFor(quantityPath = "Organism|PeripheralVenousBlood|Aciclovir|Plasma (Peripheral Venous Blood)")
+```
+## One parameter
+
+`pKParameterFor()` allows to access one PK parameter for a given output path.
+
+```{r}
+pkAnalysis$pKParameterFor(quantityPath = "Organism|PeripheralVenousBlood|Aciclovir|Plasma (Peripheral Venous Blood)", 
+                          pkParameter = "C_max")
+```
+
+## Get a Dataframe
+
+`pkAnalysesToDataFrame()` allows to access all PK parameters for all output paths as a dataframe.
+
+```{r}
+pkAnalysisDF <- pkAnalysesToDataFrame(pkAnalysis)
+pkAnalysisDF
+```
 
 # Import and Export
 
-# Custom PK Parameters
+## 
+
+- PK parameters can be exported and imported through `.csv` files.
+- These files are interoperable between PK-Sim and `{ospsuiteR}`.
+
+## Import
+
+```{r}
+# example file
+PKAnalysisFilePath <- system.file("extdata", "PKAnalyses.csv", package = "ospsuite")
+
+# import to ospsuite framework
+pkAnalysis <- importPKAnalysesFromCSV(filePath = PKAnalysisFilePath, 
+                        simulation = sim)
+```
+
+::: {.callout-warning}
+The related simulation must be loaded to import the PK parameters.
+:::
+
+## Export
+
+```{r, eval = FALSE}
+exportPKAnalysesToCSV(pkAnalyses = pkAnalysis, filePath = "PKAnalysis.csv")
+```
+
+
+# User-Defined PK Parameters
+
+## Custom PK parameters
+
+- Useful when working on different time interval or other dimensions than concentrations
+- Based on existing PK Parameters (standardPKParameter),
+- No custom formulas
+
+```r
+addUserDefinedPKParameter(name, standardPKParameter)
+```
+
+## Create a  new parameter
+
+```{r}
+myAUC <- addUserDefinedPKParameter(
+  name = "MyAUC",
+  standardPKParameter = StandardPKParameter$AUC_tEnd
+)
+
+myAUC
+```
+## Set custom rules
+
+```{r}
+# Specifies start time and end time in minute
+myAUC$startTime <- 50
+myAUC$endTime <- 80
+```
+
+## Calculate PK parameters
+
+```{r}
+pkAnalysis <- calculatePKAnalyses(results = simulationResults)
+
+pkAnalysis$pKParameterFor(quantityPath = "Organism|PeripheralVenousBlood|Aciclovir|Plasma (Peripheral Venous Blood)", 
+                          pkParameter = "MyAUC")
+```
+
+## Resources
+
+- [PK Sim section about PK-Parameters](https://docs.open-systems-pharmacology.org/working-with-pk-sim/pk-sim-documentation/pk-sim-simulations#pk-parameters)
+- [`{ospsuiteR}` vignette](https://www.open-systems-pharmacology.org/OSPSuite-R/articles/pk-analysis.html)
+- [Presentation repository](https://github.com/esqLABS/esqlabsR-training)
+

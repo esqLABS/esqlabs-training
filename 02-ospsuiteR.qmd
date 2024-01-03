@@ -631,3 +631,7 @@ myExportConfiguration$savePlot(plotGrid(plotGridConfiguration))
 ------------------------------------------------------------------------
 
 ![](resources/02/exportedPlot.svg){fig-align="center"}
+## Resources
+
+- [`{ospsuiteR}` vignettes](https://www.open-systems-pharmacology.org/OSPSuite-R/articles/)
+- [Presentation repository](https://github.com/esqLABS/esqlabsR-training)
