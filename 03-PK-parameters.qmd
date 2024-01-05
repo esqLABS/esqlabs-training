@@ -18,11 +18,11 @@ knitr::opts_chunk$set(fig.showtext = TRUE,
 
 ## PK-Analysis View in PK-Sim®
 
+![](https://881660647-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-LNl6UIiFP7k0sNQthlR%2F-LQJPSoNjgtDlxBl9HHq%2F-LOWQ5AI-r7-sKUIoPqE%2Fpk-analysis-20-17.jpg?generation=1541162017853367&alt=media)
 
-![PK-Analysis view of the Results window.](https://881660647-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-LNl6UIiFP7k0sNQthlR%2F-LQJPSoNjgtDlxBl9HHq%2F-LOWQ5AI-r7-sKUIoPqE%2Fpk-analysis-20-17.jpg?generation=1541162017853367&alt=media)
-
-Also available through `{ospsuiteR}`
-
+:::center-x
+Also available using `{ospsuiteR}` !
+:::
 
 ## Available PK parameters depends on the simulation type
 

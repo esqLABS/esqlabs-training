@@ -1,0 +1,229 @@
+---
+title: "Sensitivity Analysis"
+subtitle: "Introduction to `{OSPSuiteR}`"
+date: 2024-01-01
+author: Felix MIL
+institute: |
+  ![](esqlabs.svg){height=100}
+format: esqlabs-revealjs
+---
+
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(fig.showtext = TRUE,
+                      fig.align = "center")
+```
+
+## {.center}
+
+:::center-x
+ **🎯 Goal: Identify the most influential parameters on the model output.**
+:::
+
+##  Sensitivity Analysis in PK-Sim
+
+![](https://881660647-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-LNl6UIiFP7k0sNQthlR%2F-LOWPv3bS-p6gLjXajFs%2F-LOWQ5HAkIoayhFuXldn%2FSA_Parameters1.png?generation=1539232796810927&alt=media)
+
+
+:::center-x
+Also available using `{ospsuiteR}` !
+:::
+
+
+## Overview
+
+1. Setup sensitivity analysis
+2. Run sensitivity analysis
+3. Explore results
+4. Import & Export
+
+# Preparation
+
+---
+
+### Load `{ospsuiteR}`
+
+```{r}
+library(ospsuite)
+```
+### Load sample simulation
+
+```{r}
+sim <- loadSimulation(system.file("extdata", "Aciclovir.pkml", package = "ospsuite"))
+```
+
+# Setup sensitivity analysis
+
+## {.center}
+Steps:
+
+  1. Define parameters to be varied
+  2. Create `SensitivityAnalysis` object
+  3. Setup parameter variations
+
+## Define parameters to be varied
+
+Specific parameters to vary can be defined selectively.  
+
+If no parameters are specified, all constant and suitable parameters are automatically varied.
+
+Use `potentialVariableParametersFor()` to get a list of all suitable parameters.
+
+
+```{r}
+params <- potentialVariableParameterPathsFor(sim)
+params
+```
+
+## Create `SensitivityAnalysis` object
+
+With all potential parameters:
+
+```{r}
+sa <- SensitivityAnalysis$new(simulation = sim, 
+                              parameterPaths = params)
+sa
+```
+With only some parameters:
+
+```{r}
+sa <- SensitivityAnalysis$new(
+  simulation = sim,
+  parameterPaths = c(
+    "Aciclovir|Lipophilicity",
+    "Aciclovir|Fraction unbound (plasma, reference value)"
+  )
+)
+sa
+```
+
+
+## {.center}
+
+:::{.callout-note}
+## Supplementary parameters can be added afterwards
+
+
+```{r}
+sa$addParameterPaths("Organism|Liver|Volume")
+
+sa
+```
+:::
+
+
+## Setup parameter variations
+
+By default, parameters are incremented/decremented by 10%, twice.
+
+But this can be customized:
+
+```{r}
+# Add extra steps
+sa$numberOfSteps <- 1
+
+# Change step size
+sa$variationRange <- 0.2
+
+sa
+```
+
+::: {.callout-important}
+Settings are applied to all parameters.
+:::
+
+# Run Sensitivity Analysis
+
+---
+
+Simply execute:
+
+```{r}
+saResult <- runSensitivityAnalysis(sa)
+
+saResult
+```
+
+:::{.callout-tip}
+## Add Run options with `SensitivityAnalysisRunOptions`
+
+- `numberOfCores`
+- `showProgress`
+
+```{r, eval = FALSE}
+runSensitivityAnalysis(sa,
+  sensitivityAnalysisRunOptions =
+    SensitivityAnalysisRunOptions$new(
+      numberOfCores = 2,
+      showProgress = TRUE
+    )
+)
+```
+:::
+
+# Explore Sensitivity Analysis Results
+
+## List Available Results
+
+```{r}
+saResult$allQuantityPaths
+saResult$allPKParameterNames
+
+outputPath <- saResult$allQuantityPaths
+```
+
+## Retrieve results
+
+```{r}
+saResult$allPKParameterSensitivitiesFor(pkParameterName = "C_max",
+                                        outputPath = outputPath)
+
+saResult$allPKParameterSensitivitiesFor(pkParameterName = "AUC_inf",
+                                        outputPath = outputPath)
+```
+
+## Interpret Results
+
+```{r}
+saResult$pkParameterSensitivityValueFor(
+  pkParameterName = "C_max",
+  parameterName = "Aciclovir-Fraction unbound (plasma, reference value)",
+  outputPath = outputPath
+)
+```
+
+```{r, echo = FALSE}
+# Retrieve the value for one PKparameter/parameter combination
+c_max_fraction_unbound <- saResult$pkParameterSensitivityValueFor(
+  pkParameterName = "C_max",
+  parameterName = "Aciclovir-Fraction unbound (plasma, reference value)",
+  outputPath = outputPath
+)
+```
+
+`r c_max_fraction_unbound` means that a 20% increase of the fraction unbound in plasma leads to a `r scales::percent(c_max_fraction_unbound*0.2)` `r if (c_max_fraction_unbound < 0) "decrease" else "increase"` of $C_{max}$ of the `outputPath`.
+
+
+# Import & Export
+
+---
+
+```{r, eval = FALSE}
+# Export
+exportSensitivityAnalysisResultsToCSV(results = saResult, filePath = "mySAResults.csv")
+
+# Import
+
+importedSAResult <- importSensitivityAnalysisResultsFromCSV(filePaths = "mySAResults.csv", simulation = sim)
+```
+
+
+:::{.callout-important}
+Original Simulation is required to import sensitivity analysis results.
+:::
+
+
+## Resources
+
+- [PK Sim section about Sensitivity Analysis](https://docs.open-systems-pharmacology.org/shared-tools-and-example-workflows/sensitivity-analysis)
+- [`{ospsuiteR}` vignette](https://www.open-systems-pharmacology.org/OSPSuite-R/articles/sensitivity-analysis.html)
+- [Presentation repository](https://github.com/esqLABS/esqlabsR-training)
