@@ -1,6 +1,6 @@
 ---
 title: "Sensitivity Analysis"
-subtitle: "Introduction to `{OSPSuiteR}`"
+subtitle: "Introduction to `{ospsuite}`"
 date: 2024-01-01
 author: Felix MIL
 institute: |
@@ -25,7 +25,7 @@ knitr::opts_chunk$set(fig.showtext = TRUE,
 
 
 :::center-x
-Also available using `{ospsuiteR}` !
+Also available using `{ospsuite}` !
 :::
 
 
@@ -40,7 +40,7 @@ Also available using `{ospsuiteR}` !
 
 ---
 
-### Load `{ospsuiteR}`
+### Load `{ospsuite}`
 
 ```{r}
 library(ospsuite)
@@ -225,5 +225,5 @@ Original Simulation is required to import sensitivity analysis results.
 ## Resources
 
 - [PK Sim section about Sensitivity Analysis](https://docs.open-systems-pharmacology.org/shared-tools-and-example-workflows/sensitivity-analysis)
-- [`{ospsuiteR}` vignette](https://www.open-systems-pharmacology.org/OSPSuite-R/articles/sensitivity-analysis.html)
+- [`{ospsuite}` vignette](https://www.open-systems-pharmacology.org/OSPSuite-R/articles/sensitivity-analysis.html)
 - [Presentation repository](https://github.com/esqLABS/esqlabsR-training)

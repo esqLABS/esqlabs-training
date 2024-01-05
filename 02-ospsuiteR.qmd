@@ -104,7 +104,7 @@ plotIndividualTimeProfile(dataCombined = myDataCombined)
 
 ## Included Example
 
-`{ospsuiteR}` comes with an example simulation of Aciclovir in a `.pkml` file. It can be accessed with:
+`{ospsuite}` comes with an example simulation of Aciclovir in a `.pkml` file. It can be accessed with:
 
 ```{r, eval = FALSE}
 system.file("extdata", "Aciclovir.pkml", package = "ospsuite")
@@ -633,5 +633,5 @@ myExportConfiguration$savePlot(plotGrid(plotGridConfiguration))
 ![](resources/02/exportedPlot.svg){fig-align="center"}
 ## Resources
 
-- [`{ospsuiteR}` vignettes](https://www.open-systems-pharmacology.org/OSPSuite-R/articles/)
+- [`{ospsuite}` vignettes](https://www.open-systems-pharmacology.org/OSPSuite-R/articles/)
 - [Presentation repository](https://github.com/esqLABS/esqlabsR-training)
