@@ -1,0 +1,75 @@
+---
+title: "Dimensions & Units"
+subtitle: "Introduction to `{ospsuite}`"
+date: 2024-01-01
+author: Felix MIL
+institute: |
+  ![](esqlabs.svg){height=100}
+format: esqlabs-revealjs
+---
+
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(fig.showtext = TRUE,
+                      fig.align = "center")
+```
+
+## {.center}
+
+:::center-x
+ **🎯 Goal: Harmonize units and convert them easily**
+:::
+
+
+## In PK-Sim and MoBi
+
+PK-Sim uses the concept of Dimensions and Units
+
+- A **dimension** represents the type of quantity (*e.g.* Volume, Mass, Concentration)
+- A **unit** is one of several ways to measure a dimension (*e.g.* L, mL; Kg, g; mg/L, µg/mL)
+
+The software uses a **base unit** for each dimension
+
+- Volume in L,
+- Mass is in kg,
+- Concentration (molar) is in µmol/L
+
+## {.center}
+
+:::{.callout-note}
+Even if the user can deviate from base unit, `PK-Sim` will always use the base unit internally
+:::
+
+:::{.callout-important}
+The base units are often different from the units that are displayed by default in PK-Sim, these are called the **display units**
+:::
+
+:::center-x
+[Full List of Dimensions and Units](https://docs.open-systems-pharmacology.org/appendix/appendix#a.1.-dimensions-and-base-units)
+:::
+
+## In `{ospsuite}`
+
+`{ospsuite}` uses the same concept of Dimensions and Units.
+The package provides a set of functions for easy conversion between units of a same dimension.
+
+- `toUnit()` to convert from one unit to another
+- `toBaseUnit()` to convert from any unit to the base unit
+- `toDisplayUnit()` to convert from the base unit to the display unit
+
+```{r}
+ospsuite::toUnit(quantityOrDimension = "Volume",values = 1,sourceUnit = "L", targetUnit = "mL")
+
+ospsuite::toBaseUnit(quantityOrDimension = "Volume",values = 1000, unit = "mL")
+```
+
+
+
+
+
+
+
+## Resources
+
+- [PK Sim section about Sensitivity Analysis](https://docs.open-systems-pharmacology.org/shared-tools-and-example-workflows/sensitivity-analysis)
+- [`{ospsuite}` vignette](https://www.open-systems-pharmacology.org/OSPSuite-R/articles/sensitivity-analysis.html)
+- [Presentation repository](https://github.com/esqLABS/esqlabsR-training)
