@@ -27,6 +27,8 @@ PK-Sim uses the concept of Dimensions and Units
 - A **dimension** represents the type of quantity (*e.g.* Volume, Mass, Concentration)
 - A **unit** is one of several ways to measure a dimension (*e.g.* L, mL; Kg, g; mg/L, µg/mL)
 
+. . .
+
 The software uses a **base unit** for each dimension
 
 - Volume in L,
@@ -50,22 +52,100 @@ The base units are often different from the units that are displayed by default 
 ## In `{ospsuite}`
 
 `{ospsuite}` uses the same concept of Dimensions and Units.
+
+all Dimensions and Units available are listed in the package.
+
+
+```{r, echo = FALSE}
+library(ospsuite)
+```
+
+```{r, out.height="20%"}
+ospDimensions
+```
+
+---
+
+```{r, out.height="20%"}
+ospUnits
+```
+
+## Base and Display Units
+
+Like in PK-Sim and MoBi, `{ospsuite}` uses base units internally. 
+User can interact with the package using other units like display units.
+
+```{r}
+#| output-location: fragment
+library(ospsuite)
+
+sim <- loadSimulation(system.file("extdata", "Aciclovir.pkml", package = "ospsuite"))
+
+bmiParam <- getParameter("Organism|BMI", sim)
+
+bmiParam
+```
+
+---
+
+:::callout-note
+## Base and Display units are listed in Parameters
+```{r}
+bmiParam$unit
+bmiParam$displayUnit
+bmiParam$allUnits
+```
+:::
+
+::: {.center-x}
+kg/dm² is the base unit for BMI. But the display unit is kg/m².
+:::
+
+## Convert Units
+
 The package provides a set of functions for easy conversion between units of a same dimension.
+
+. . .
 
 - `toUnit()` to convert from one unit to another
 - `toBaseUnit()` to convert from any unit to the base unit
 - `toDisplayUnit()` to convert from the base unit to the display unit
 
+. . .
+
 ```{r}
-ospsuite::toUnit(quantityOrDimension = "Volume",values = 1,sourceUnit = "L", targetUnit = "mL")
+ospsuite::toUnit(quantityOrDimension = "Volume", values = 1,sourceUnit = "L", targetUnit = "mL")
 
 ospsuite::toBaseUnit(quantityOrDimension = "Volume",values = 1000, unit = "mL")
 ```
 
+## {.center}
+
+```{r}
+bmiParam
+
+toDisplayUnit(quantity = bmiParam,
+              values = 0.23)
+```
 
 
+## Set Parameter Values
 
+```{r}
+setParameterValues(bmiParam, 25)
 
+bmiParam
+```
+
+---
+
+```{r}
+setParameterValues(bmiParam, 25, units = "kg/m²")
+bmiParam
+
+setParameterValues(bmiParam, toBaseUnit(bmiParam, 25,unit =  "kg/m²"))
+bmiParam
+```
 
 
 ## Resources
